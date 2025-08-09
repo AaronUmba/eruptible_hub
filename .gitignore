@@ -22,13 +22,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-# Backend dependencies - these can be reinstalled with `npm install`
-backend/node_modules/
-
-# Backend environment variables - contains secret keys!
-backend/.env
-
-# General Node.js and OS files to ignore
-npm-debug.log
-.DS_Store

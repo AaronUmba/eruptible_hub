@@ -1,62 +1,69 @@
 
 import React, { useState } from 'react';
-import { FileText, Database, KeyRound, Users, Server, BookOpen } from 'lucide-react';
+import { FileText, KeyRound, Server, Anchor, BookOpen } from 'lucide-react';
 
-type DocKey = 'architecture' | 'connecting' | 'schema' | 'auth' | 'backend';
+type DocKey = 'architecture' | 'deployment' | 'schema' | 'auth' | 'backend';
 
 const docs: Record<DocKey, { title: string, icon: React.ElementType, content: React.ReactNode }> = {
   architecture: {
-    title: "System Architecture Overview",
+    title: "System Architecture",
     icon: Server,
     content: (
       <>
-        <p className="lead">This document provides a high-level overview of the Eruptible PM dashboard's current architecture.</p>
-        <h3 className="doc-heading">Core Components</h3>
+        <p className="lead">This document provides a high-level overview of the Eruptible PM dashboard's multi-container architecture, designed for deployment with Docker.</p>
+        <h3 className="doc-heading">Core Services (Containers)</h3>
         <ul className="list-disc list-inside space-y-2 text-text-secondary">
-          <li><strong>Frontend:</strong> A Single-Page Application (SPA) built with <strong>React and TypeScript</strong>.</li>
-          <li><strong>Styling:</strong> <strong>Tailwind CSS</strong> is used for all styling, with a pre-configured theme for light and dark modes.</li>
-          <li><strong>State Management:</strong> Global application state is managed by React's built-in <strong>Context API</strong> (`AppContext`).</li>
-          <li><strong>Data Source:</strong> The application fetches all project, client, and deliverable data directly from the <strong>Airtable API</strong>.</li>
-          <li><strong>Authentication:</strong> User login is handled by a <strong>mock API service</strong> (`services/api.ts`) that lives within the frontend code. This is for demonstration purposes only.</li>
+          <li><strong>Proxy (Nginx):</strong> The public entry point for all traffic. It serves the frontend application and intelligently forwards API requests (anything to `/api/*`) to the backend service.</li>
+          <li><strong>Frontend (React/Nginx):</strong> A static build of the React SPA, served by its own lightweight Nginx server. It contains all the UI and client-side logic. This service is not exposed publicly.</li>
+          <li><strong>Backend (Node.js/Express):</strong> A dedicated API server that handles all business logic, authentication, and communication with the Airtable API. This service is not exposed publicly.</li>
         </ul>
-        <h3 className="doc-heading">Data Flow</h3>
-        <p className="text-text-secondary">The current architecture is frontend-centric. This is a common pattern for rapid development and prototypes.</p>
+        <h3 className="doc-heading">Data & Request Flow</h3>
+        <p className="text-text-secondary">This architecture provides enhanced security and scalability by abstracting the data source (Airtable) behind a dedicated backend.</p>
         <div className="space-y-4 my-4">
             <div className="p-4 bg-secondary rounded-lg border border-subtle">
-                <p className="font-semibold text-text-primary">Project Data Flow:</p>
-                <p className="font-mono text-sm text-brand mt-1">[User's Browser: React App] &lt;--&gt; [Airtable API]</p>
+                <p className="font-semibold text-text-primary">User Request (e.g., loading the page):</p>
+                <p className="font-mono text-sm text-brand mt-1">[User Browser] → [Proxy] → [Frontend Service]</p>
             </div>
              <div className="p-4 bg-secondary rounded-lg border border-subtle">
-                <p className="font-semibold text-text-primary">Authentication Flow:</p>
-                <p className="font-mono text-sm text-brand mt-1">[User's Browser: React App] &lt;--&gt; [Internal Mock API]</p>
+                <p className="font-semibold text-text-primary">API Request (e.g., logging in):</p>
+                <p className="font-mono text-sm text-brand mt-1">[User Browser] → [Proxy: /api/*] → [Backend Service] → [Airtable API]</p>
             </div>
         </div>
-        <h3 className="doc-heading">Conclusion</h3>
-        <p className="text-text-secondary">This architecture is simple and effective for its purpose as a direct Airtable visualizer. For enhanced security, scalability, and integration with other services, the recommended next step is to build a dedicated backend service to act as an intermediary, as outlined in the <strong>Backend Integration Guide</strong>.</p>
+        <h3 className="doc-heading">Security</h3>
+        <p className="text-text-secondary">Airtable API keys and other secrets are stored exclusively on the backend server via environment variables and are never exposed to the user's browser, providing a secure setup.</p>
       </>
     )
   },
-  connecting: {
-    title: "Connecting to Airtable",
-    icon: Database,
+  deployment: {
+    title: "Deployment Guide",
+    icon: Anchor,
     content: (
       <>
-        <p className="lead">The platform is powered entirely by data from an Airtable base. To connect the application, you must provide your Airtable credentials in the <strong>Admin Dashboard {'>'} Settings</strong> panel.</p>
-        <h3 className="doc-heading">Required Information</h3>
+        <p className="lead">The application is designed to be deployed using Docker and Docker Compose, simplifying the setup process on any machine with Docker installed.</p>
+        <h3 className="doc-heading">Prerequisites</h3>
+        <ul className="list-disc list-inside space-y-2 text-text-secondary">
+            <li>A server or local machine with Docker and Docker Compose installed.</li>
+            <li>Git installed to clone the repository.</li>
+            <li>An open port (typically port 80) on the server.</li>
+        </ul>
+
+        <h3 className="doc-heading">Setup Steps</h3>
         <ol className="list-decimal list-inside space-y-3 text-text-secondary">
-            <li><strong>API Key:</strong> Your personal Airtable access token. This should be treated like a password and kept secret. You can find this on your <a href="https://airtable.com/account" target="_blank" rel="noopener noreferrer" className="text-brand underline">Airtable account page</a>.</li>
-            <li><strong>Base ID:</strong> The unique identifier for the Airtable base you want to connect to. This typically starts with `app...`. You can find this in the API documentation for your base.</li>
-            <li><strong>Table Names:</strong> The exact, case-sensitive names of the tables in your base that hold your data for Projects, Clients, and Deliverables.</li>
+            <li>Clone the repository to your server: <pre className="doc-code !inline-block !p-1 !my-0">git clone ...</pre></li>
+            <li>Navigate into the project directory: <pre className="doc-code !inline-block !p-1 !my-0">cd eruptible-pm-stack</pre></li>
+            <li>Create the backend environment file by copying the example: <pre className="doc-code !inline-block !p-1 !my-0">cp backend/.env.example backend/.env</pre></li>
+            <li>Edit the new `.env` file and fill in your Airtable and admin credentials: <pre className="doc-code !inline-block !p-1 !my-0">nano backend/.env</pre></li>
+            <li>Build and run the application using Docker Compose: <pre className="doc-code !inline-block !p-1 !my-0">docker-compose up --build -d</pre></li>
         </ol>
-        <div className="p-4 mt-6 rounded-md bg-yellow-500/10 border border-yellow-500/20 text-yellow-300">
-          <p className="font-bold">Important Note</p>
-          <p className="text-sm">The application expects a very specific schema (field names and types) in the tables you connect. Please refer to the <strong>Data Schema & Models</strong> document for the exact requirements.</p>
+         <div className="p-4 mt-6 rounded-md bg-green-500/10 border border-green-500/20 text-green-300">
+          <p className="font-bold">That's It!</p>
+          <p className="text-sm">Your application should now be running and accessible via your server's IP address in a web browser.</p>
         </div>
       </>
     )
   },
   schema: {
-    title: "Data Schema & Models",
+    title: "Airtable Schema",
     icon: FileText,
     content: (
        <>
@@ -64,7 +71,7 @@ const docs: Record<DocKey, { title: string, icon: React.ElementType, content: Re
         
         <div className="schema-section">
             <h4 className="schema-title">Projects Table</h4>
-            <p className="schema-description">Set this name in `Settings {'>'} Projects Table Name`.</p>
+            <p className="schema-description">Referenced by `PROJECTS_TABLE` in your `.env` file.</p>
             <table className="doc-table">
                 <thead><tr><th>Field Name</th><th>Field Type</th><th>Description</th></tr></thead>
                 <tbody>
@@ -79,7 +86,7 @@ const docs: Record<DocKey, { title: string, icon: React.ElementType, content: Re
 
         <div className="schema-section">
             <h4 className="schema-title">Clients Table</h4>
-            <p className="schema-description">Set this name in `Settings {'>'} Clients Table Name`.</p>
+            <p className="schema-description">Referenced by `CLIENTS_TABLE` in your `.env` file.</p>
             <table className="doc-table">
                 <thead><tr><th>Field Name</th><th>Field Type</th><th>Description</th></tr></thead>
                 <tbody>
@@ -95,7 +102,7 @@ const docs: Record<DocKey, { title: string, icon: React.ElementType, content: Re
 
         <div className="schema-section">
             <h4 className="schema-title">Deliverables Table</h4>
-            <p className="schema-description">Set this name in `Settings {'>'} Deliverables Table Name`.</p>
+            <p className="schema-description">Referenced by `DELIVERABLES_TABLE` in your `.env` file.</p>
             <table className="doc-table">
                 <thead><tr><th>Field Name</th><th>Field Type</th><th>Description</th></tr></thead>
                 <tbody>
@@ -111,67 +118,52 @@ const docs: Record<DocKey, { title: string, icon: React.ElementType, content: Re
     )
   },
   auth: {
-    title: "Authentication & User Roles",
+    title: "Authentication",
     icon: KeyRound,
     content: (
        <>
-        <p className="lead">The current authentication system is a mock implementation designed for demonstration purposes. It is not secure and should be replaced by a proper backend service for any production use.</p>
+        <p className="lead">Authentication is handled by the backend service, which verifies user credentials against environment variables (for the admin) or the Airtable Clients table.</p>
         <h3 className="doc-heading">User Roles</h3>
         <ul className="list-disc list-inside space-y-2 text-text-secondary">
-          <li><strong>Admin:</strong> Has full access to all projects, clients, settings, and documentation. Can modify all data.</li>
-          <li><strong>Client:</strong> Has restricted access. The client-facing dashboard is currently a placeholder but is designed to eventually show a filtered view of only their projects.</li>
+          <li><strong>Admin:</strong> Has full access to all projects, clients, and settings. Credentials are set in the `backend/.env` file.</li>
+          <li><strong>Client:</strong> Has restricted access (client dashboard is currently a placeholder). Credentials are based on the `Client Username` field in Airtable.</li>
         </ul>
         <h3 className="doc-heading">Login Credentials (Default)</h3>
         <ul className="list-disc list-inside space-y-2 text-text-secondary">
-          <li><strong>Admin Login:</strong> Username `admin`, Password `password`.</li>
-          <li><strong>Client Login:</strong> Use the value from the `Client Username` field in your Airtable "Clients" table. The password for all clients is hardcoded to `password`.</li>
+          <li><strong>Admin Login:</strong> Username and Password as defined in your `.env` file.</li>
+          <li><strong>Client Login:</strong> Use a value from the `Client Username` field in Airtable. The password for all clients is hardcoded in the backend to `password`.</li>
         </ul>
         <h3 className="doc-heading">Two-Factor Authentication (2FA)</h3>
-        <p className="text-text-secondary mb-2">A 2FA system is available for the admin account, which can be configured in `Settings {'>'} Admin Security`.</p>
-        <div className="p-4 mt-2 rounded-md bg-destructive/10 border border-destructive/20 text-destructive-foreground">
+        <p className="text-text-secondary mb-2">A demo 2FA system is available for the admin account, which can be configured in `Settings > Admin Security`.</p>
+        <div className="p-4 mt-2 rounded-md bg-destructive/10 border border-destructive/20 text-destructive">
           <p className="font-bold">Security Warning</p>
-          <p className="text-sm">The 2FA secret is stored in your browser's local storage, and the code verification happens on the client-side. This is <strong>not secure</strong>. In a real application, the secret must be stored and verified on a secure server.</p>
+          <p className="text-sm">The 2FA secret and validation logic are currently handled on the frontend for demo purposes. In a real production app, this logic must be moved entirely to a secure backend.</p>
         </div>
       </>
     )
   },
   backend: {
-    title: "Backend Integration Guide",
-    icon: Users,
+    title: "Backend API",
+    icon: Server,
     content: (
       <>
-        <p className="lead">This guide is for developers creating a custom backend (e.g., in Node.js) to replace the direct Airtable connection and mock authentication, creating a more secure and scalable application.</p>
-        <h3 className="doc-heading">Step 1: Create your API Endpoints</h3>
-        <p className="text-text-secondary">Your backend should securely wrap the Airtable API and provide its own interface for the frontend to consume. Your server will be responsible for authenticating users and then making requests to Airtable using a securely stored API key.</p>
-        <p className="text-text-secondary mt-2">Example endpoints to create:</p>
-        <ul className="list-disc list-inside space-y-1 my-2 font-mono text-sm bg-secondary p-4 rounded-md text-text-secondary">
-            <li>`POST /api/auth/login` - Authenticate users.</li>
-            <li>`GET /api/projects` - Fetch all projects.</li>
-            <li>`GET /api/clients` - Fetch all clients.</li>
-            <li>`PATCH /api/deliverables/:id` - Update a specific deliverable.</li>
-            <li>...and so on for all required data operations.</li>
+        <p className="lead">The Node.js backend serves a simple JSON API for the frontend to consume. It acts as a secure intermediary between the client and the Airtable service.</p>
+        <h3 className="doc-heading">Core Responsibilities</h3>
+        <ul className="list-disc list-inside space-y-2 text-text-secondary">
+            <li><strong>Securely store secrets</strong> (like the Airtable API key) using environment variables.</li>
+            <li><strong>Authenticate users</strong> against stored credentials.</li>
+            <li><strong>Fetch data</strong> from Airtable on behalf of the user.</li>
+            <li><strong>Process and shape data</strong> from Airtable into the format required by the frontend.</li>
+            <li><strong>Handle data mutations</strong> (updates, creations) and reflect them in Airtable.</li>
         </ul>
-
-        <h3 className="doc-heading">Step 2: Refactor Frontend Services</h3>
-        <p className="text-text-secondary">The primary location for changes will be in `contexts/AppContext.tsx`. You will need to modify the functions that currently call `services/airtable.ts` and `services/api.ts`.</p>
-        <p className="text-text-secondary mt-2">Example refactor for `loadAirtableData`:</p>
-        <pre className="doc-code"><code>
-{`// --- Before (in AppContext.tsx) ---
-import * as airtable from '../services/airtable';
-// ...
-const { projects, clients } = await airtable.getProjectsAndClients(config);
-dispatch({ type: 'FETCH_DATA_SUCCESS', payload: { projects, clients, ... } });
-
-// --- After (in AppContext.tsx) ---
-// ...
-const response = await fetch('/api/data'); // Your new backend endpoint
-const { projects, clients } = await response.json();
-dispatch({ type: 'FETCH_DATA_SUCCESS', payload: { projects, clients, ... } });
-`}
-        </code></pre>
-        <p className="text-text-secondary mt-4">Similarly, the `login` function should be updated to call your new `POST /api/auth/login` endpoint instead of the mock API service.</p>
-        <h3 className="doc-heading">Conclusion</h3>
-        <p className="text-text-secondary">By routing all data and authentication requests through a dedicated backend, you centralize business logic, enhance security by never exposing Airtable keys to the browser, and gain the ability to scale, cache, and integrate other services in the future.</p>
+        <h3 className="doc-heading">API Endpoints</h3>
+        <p className="text-text-secondary">The following endpoints are exposed by the backend and proxied through Nginx under the `/api` path.</p>
+        <ul className="list-disc list-inside space-y-1 my-2 font-mono text-sm bg-secondary p-4 rounded-md text-text-secondary">
+            <li><code className="text-blue-400">POST /api/auth/login</code> - Authenticate users.</li>
+            <li><code className="text-green-400">GET /api/data</code> - Fetch all projects and clients.</li>
+            <li><code className="text-yellow-400">PATCH /api/deliverables/:id</code> - Update a specific deliverable.</li>
+            <li><code className="text-yellow-400">PATCH /api/clients/:id</code> - Update a specific client's dashboard settings.</li>
+        </ul>
       </>
     )
   }
@@ -215,11 +207,11 @@ const DocumentationPanel: React.FC = () => {
             @apply font-mono text-text-primary;
         }
         .doc-code {
-            @apply block text-sm whitespace-pre-wrap bg-secondary p-4 rounded-md border border-subtle mt-2;
+            @apply inline-block bg-secondary p-1 rounded-md border border-subtle text-xs;
         }
       `}</style>
 
-      <div className="bg-surface border border-subtle rounded-lg p-6 md:p-8 min-h-[60vh] flex flex-col md:flex-row gap-8">
+      <div className="bg-surface border border-subtle rounded-lg p-6 md:p-8 min-h-[calc(100vh-12rem)] flex flex-col md:flex-row gap-8">
         {/* Left Nav */}
         <nav className="md:w-1/4 flex-shrink-0 border-b md:border-b-0 md:border-r border-subtle pb-4 md:pb-0 md:pr-8">
             <div className="flex items-center mb-4">
