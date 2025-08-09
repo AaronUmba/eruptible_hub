@@ -35,9 +35,9 @@ services:
     image: nginx:stable-alpine
     # Name the container for easier identification.
     container_name: eruptible-pm-proxy
-    # Map port 80 on your VPS to port 80 inside this container. This makes your app accessible from a web browser.
+    # Map port 8080 on your VPS to port 80 inside this container. This avoids conflict with Nginx Proxy Manager.
     ports:
-      - "80:80"
+      - "8080:80"
     # Mount our custom Nginx configuration file into the container, replacing the default one.
     # This tells Nginx how to handle our specific application's traffic.
     volumes:
