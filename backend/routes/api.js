@@ -3,6 +3,12 @@ const express = require('express');
 const router = express.Router();
 const { getProjectsAndClients, updateRecord, loginUser } = require('../services/airtableService');
 
+// --- Health Check Route ---
+
+router.get('/health', (req, res) => {
+    res.json({ status: 'ok', message: 'Backend is running' });
+});
+
 // --- Data Fetching Routes ---
 
 // Endpoint to get all initial data (projects, clients, deliverables)
