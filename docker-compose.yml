@@ -1,0 +1,49 @@
+# Start with version 3.8 of Docker Compose, which is a modern and stable version.
+version: '3.8'
+
+# Define the collection of services (containers) that make up the application.
+services:
+
+  # --- The Backend Node.js Service ---
+  # This service runs your Node.js server.
+  backend:
+    # Tell Docker to build this container using the Dockerfile found inside the './backend' directory.
+    build: ./backend
+    # Tell Docker to name the container 'eruptible-pm-backend' for easier identification.
+    container_name: eruptible-pm-backend
+    # Load the secret variables (like API keys) from the .env file located in the backend directory.
+    # This keeps your secrets out of the code.
+    env_file:
+      - ./backend/.env
+    # We don't need to expose ports here to the host machine, as the Nginx proxy will handle communication internally.
+
+  # --- The Frontend React Service ---
+  # This service builds the React app into static files (HTML, JS, CSS).
+  frontend:
+    # Tell Docker to build this container from the project's root directory (context: .).
+    # And specify that it should use the 'Dockerfile.frontend' file for instructions.
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    # Name the container for easier identification.
+    container_name: eruptible-pm-frontend
+
+  # --- The Nginx Proxy Service ---
+  # This service is the public entry point. It receives all web traffic and decides where it should go.
+  proxy:
+    # Use the official, lightweight Nginx image from Docker Hub.
+    image: nginx:stable-alpine
+    # Name the container for easier identification.
+    container_name: eruptible-pm-proxy
+    # Map port 80 on your VPS to port 80 inside this container. This makes your app accessible from a web browser.
+    ports:
+      - "80:80"
+    # Mount our custom Nginx configuration file into the container, replacing the default one.
+    # This tells Nginx how to handle our specific application's traffic.
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    # This is crucial. It tells Docker not to start the proxy until the backend and frontend services
+    # are running, preventing connection errors on startup.
+    depends_on:
+      - backend
+      - frontend
