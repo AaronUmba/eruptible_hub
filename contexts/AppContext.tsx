@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect, ReactNode, useCallback } from 'react';
 import * as OTPAuth from 'otpauth'; // Note: 2FA logic is now demo-only without a backend implementation
-import { AppState, Action, User, Project, Deliverable, ClientCompany, AdminCredentials, AuthResponse, LogEntry } from '../types';
+import { AppState, Action, User, Deliverable, ClientCompany, AdminCredentials, AuthResponse, LogEntry } from '../types';
 
 const AUTH_TOKEN_KEY = 'eruptible_auth_token';
 const ADMIN_CREDENTIALS_KEY = 'eruptible_admin_credentials'; // Kept for 2FA demo on frontend

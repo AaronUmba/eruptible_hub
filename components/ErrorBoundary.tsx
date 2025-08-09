@@ -1,5 +1,5 @@
 
-import React, { Component, ReactNode, ErrorInfo } from 'react';
+import { Component, ReactNode, ErrorInfo } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { AppContext, AppContextType } from '../contexts/AppContext';
 
@@ -16,7 +16,7 @@ class ErrorBoundary extends Component<Props, State> {
     hasError: false,
   };
 
-  context!: AppContextType;
+  declare context: AppContextType;
   static contextType = AppContext;
 
   public static getDerivedStateFromError(_: Error): State {
