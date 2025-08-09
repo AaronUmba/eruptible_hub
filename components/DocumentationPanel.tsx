@@ -134,7 +134,7 @@ const docs: Record<DocKey, { title: string, icon: React.ElementType, content: Re
           <li><strong>Client Login:</strong> Use a value from the `Client Username` field in Airtable. The password for all clients is hardcoded in the backend to `password`.</li>
         </ul>
         <h3 className="doc-heading">Two-Factor Authentication (2FA)</h3>
-        <p className="text-text-secondary mb-2">A demo 2FA system is available for the admin account, which can be configured in `Settings > Admin Security`.</p>
+        <p className="text-text-secondary mb-2">A demo 2FA system is available for the admin account, which can be configured in `Settings &gt; Admin Security`.</p>
         <div className="p-4 mt-2 rounded-md bg-destructive/10 border border-destructive/20 text-destructive">
           <p className="font-bold">Security Warning</p>
           <p className="text-sm">The 2FA secret and validation logic are currently handled on the frontend for demo purposes. In a real production app, this logic must be moved entirely to a secure backend.</p>
