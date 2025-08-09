@@ -1,0 +1,5 @@
+{
+  "name": "Eruptible PM Dashboard",
+  "description": "A project management dashboard to visualize projects and their deliverables from an Airtable backend. This MVP provides an admin overview of all ongoing projects.",
+  "requestFramePermissions": []
+}
