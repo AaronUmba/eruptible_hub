@@ -16,6 +16,8 @@ services:
     env_file:
       - ./backend/.env
     # We don't need to expose ports here to the host machine, as the Nginx proxy will handle communication internally.
+    networks:
+      - npm_network
 
   # --- The Frontend React Service ---
   # This service builds the React app into static files (HTML, JS, CSS).
@@ -27,6 +29,8 @@ services:
       dockerfile: Dockerfile.frontend
     # Name the container for easier identification.
     container_name: eruptible-pm-frontend
+    networks:
+      - npm_network
 
   # --- The Nginx Proxy Service ---
   # This service is the public entry point. It receives all web traffic and decides where it should go.
@@ -47,3 +51,11 @@ services:
     depends_on:
       - backend
       - frontend
+    networks:
+      - npm_network
+
+# Define networks
+networks:
+  npm_network:
+    external: true
+    name: npm-stack_default
