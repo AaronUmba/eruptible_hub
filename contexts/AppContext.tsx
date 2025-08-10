@@ -208,8 +208,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
       const data: AuthResponse = await response.json();
 
-      // Check if 2FA is required
-      if (data.requires2FA) {
+      // 2FA check remains a frontend demo for now
+      if (data.user.role === 'admin' && state.adminCredentials.twoFactorEnabled) {
           return '2FA_REQUIRED';
       }
       localStorage.setItem(AUTH_TOKEN_KEY, data.token);
@@ -222,21 +222,26 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const verify2FACode = async (code: string): Promise<void> => {
+      const { adminCredentials } = state;
+      if (!adminCredentials.twoFactorEnabled || !adminCredentials.twoFactorSecret) {
+          throw new Error('2FA is not configured for this account.');
+      }
       try {
-        const response = await fetch('/api/auth/verify-2fa', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                username: state.adminCredentials.username, 
-                token: code 
-            }),
+        const totp = new OTPAuth.TOTP({
+            issuer: 'Eruptible PM',
+            label: adminCredentials.username,
+            secret: adminCredentials.twoFactorSecret,
         });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Invalid 2FA code');
-        }
-        
+        const delta = totp.validate({ token: code, window: 1 });
+        if (delta === null) throw new Error('Invalid 2FA code.');
+
+        // In real app, you'd send this to a `/api/auth/verify-2fa` endpoint.
+        // For demo, we just re-run the login logic to get a token.
+        const response = await fetch('/api/auth/login', {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify({ username: adminCredentials.username, password: adminCredentials.password }),
+        });
         const data: AuthResponse = await response.json();
         localStorage.setItem(AUTH_TOKEN_KEY, data.token);
         dispatch({ type: 'LOGIN_SUCCESS', payload: data });
