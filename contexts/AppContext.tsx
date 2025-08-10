@@ -219,6 +219,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   
   const updateAdminCredentials = (creds: Partial<AdminCredentials>) => {
       dispatch({ type: 'UPDATE_ADMIN_CREDENTIALS', payload: creds });
+      // Persist to backend so login uses new password
+      fetch('/api/auth/admin', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: creds.username ?? state.adminCredentials.username,
+          password: creds.password,
+          recoveryEmail: creds.recoveryEmail ?? state.adminCredentials.recoveryEmail,
+        })
+      }).catch(() => { /* ignore for now */});
       addLog({ type: 'info', message: 'Admin credentials updated.' });
   };
   

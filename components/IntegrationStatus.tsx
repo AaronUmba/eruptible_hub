@@ -1,11 +1,28 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAppContext } from '../contexts/AppContext';
-import { Signal, RefreshCw } from 'lucide-react';
+import { Signal, RefreshCw, Cloud } from 'lucide-react';
 
 const IntegrationStatus: React.FC = () => {
     const { state, manualSync } = useAppContext();
     const { loading, error, lastSync, user } = state;
+    const [airtable, setAirtable] = useState<{connected: boolean; reason?: string} | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        async function check() {
+            try {
+                const res = await fetch('/api/airtable/health');
+                const data = await res.json();
+                if (!cancelled) setAirtable(data);
+            } catch (e: any) {
+                if (!cancelled) setAirtable({ connected: false, reason: e.message });
+            }
+        }
+        check();
+        const id = setInterval(check, 30000);
+        return () => { cancelled = true; clearInterval(id); };
+    }, []);
 
     const getStatus = (): { text: string; color: string; dotColor: string, subtext?: string } => {
         if (!user) {
@@ -54,6 +71,21 @@ const IntegrationStatus: React.FC = () => {
                     )}
                 </div>
             </div>
+        </div>
+        <div className="bg-surface border border-subtle rounded-lg p-6">
+            <div className="flex items-center mb-4">
+                <Cloud className="w-6 h-6 mr-3 text-brand" />
+                <h2 className="text-xl font-bold text-text-primary">Airtable Connection</h2>
+            </div>
+            <div className="flex items-center">
+                <span className={`w-2.5 h-2.5 rounded-full mr-3 ${airtable?.connected ? 'bg-green-500' : 'bg-destructive'}`}></span>
+                <p className={`font-semibold ${airtable?.connected ? 'text-green-400' : 'text-destructive'}`}>
+                    {airtable?.connected ? 'Connected' : 'Not Connected'}
+                </p>
+            </div>
+            {!airtable?.connected && airtable?.reason && (
+                <p className="text-sm text-text-secondary mt-1 ml-6 max-w-md">{airtable.reason}</p>
+            )}
         </div>
     );
 };
