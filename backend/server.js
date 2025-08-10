@@ -16,7 +16,7 @@ app.use('/api', apiRoutes);
 
 // Basic health check endpoint
 app.get('/', (req, res) => {
-    res.send('Eruptible PM Backend is running.');
+    res.send('Eruptible Dashboard Backend is running.');
 });
 
 

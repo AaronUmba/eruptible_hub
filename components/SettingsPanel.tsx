@@ -32,7 +32,9 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ username, role }) => {
     <div className="max-w-4xl mx-auto">
       
       <IntegrationStatus />
-      
+
+      <div className="mt-8" />
+
       {role === 'admin' && <AdminSecuritySettings />}
 
       {/* Profile Section */}

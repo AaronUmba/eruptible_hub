@@ -16,6 +16,7 @@ async function getAdminCredentials() {
     const creds = JSON.parse(raw);
     return creds;
   } catch (e) {
+    // When no admin.json exists, treat as no override set
     return null;
   }
 }

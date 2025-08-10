@@ -105,7 +105,7 @@ const Login: React.FC = () => {
     <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4 font-sans">
         <div className="w-full max-w-md">
             <header className="text-center mb-8">
-                <h1 className="text-4xl font-bold text-text-primary tracking-tight">Eruptible PM</h1>
+                <h1 className="text-4xl font-bold text-text-primary tracking-tight">Eruptible Dashboard</h1>
                 <p className="text-text-secondary mt-2">Please sign in to continue</p>
             </header>
             <div className="bg-surface border border-subtle rounded-lg p-8 shadow-sm">

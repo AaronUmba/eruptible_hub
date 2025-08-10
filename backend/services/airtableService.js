@@ -67,15 +67,7 @@ const updateRecord = async (tableName, recordId, fields) => {
 };
 
 const loginUser = async (username, password) => {
-    // Admin login check
-    if (username.toLowerCase() === process.env.ADMIN_USERNAME.toLowerCase() && password === process.env.ADMIN_PASSWORD) {
-        return {
-            token: `fake-jwt-for-${username}-${Date.now()}`,
-            user: { username: process.env.ADMIN_USERNAME, role: 'admin' },
-        };
-    }
-
-    // Client login check
+    // Client login check (admin login handled separately in routes)
     const clients = await fetchAllRecords(process.env.CLIENTS_TABLE);
     const clientUser = clients.find(c => c['Client Username']?.toLowerCase() === username.toLowerCase());
 

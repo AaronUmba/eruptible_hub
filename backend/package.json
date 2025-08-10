@@ -2,7 +2,7 @@
 {
   "name": "eruptible-pm-backend",
   "version": "1.0.0",
-  "description": "Backend server for the Eruptible PM Dashboard",
+  "description": "Backend server for the Eruptible Dashboard",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

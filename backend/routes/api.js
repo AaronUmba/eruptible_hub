@@ -83,12 +83,13 @@ router.patch('/clients/:recordId', async (req, res) => {
 router.post('/auth/login', async (req, res) => {
     const { username, password } = req.body;
     try {
-        // Check for locally saved admin override first
+        // Check for locally saved admin first (disables .env defaults when present)
         const savedAdmin = await getAdminCredentials();
         if (savedAdmin && username.toLowerCase() === (savedAdmin.username || '').toLowerCase() && password === savedAdmin.password) {
             return res.json({ token: `fake-jwt-for-${username}-${Date.now()}`, user: { username: savedAdmin.username, role: 'admin' } });
         }
 
+        // Fallback to Airtable/client login only (do NOT allow default admin/password from env once admin file exists)
         const result = await loginUser(username, password);
         res.json(result);
     } catch (error) {

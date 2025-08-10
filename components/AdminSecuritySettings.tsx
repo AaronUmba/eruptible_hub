@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../contexts/AppContext';
 import { AdminCredentials } from '../types';
-import { ShieldCheck, AlertTriangle } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 
 // 2FA removed for now
 
@@ -78,13 +78,7 @@ const AdminSecuritySettings: React.FC = () => {
                 <h2 className="text-xl font-bold text-text-primary">Admin Security</h2>
             </div>
             
-            <div className="bg-yellow-500/10 border border-yellow-500/20 text-yellow-700 dark:text-yellow-300 p-4 rounded-md mb-6 flex items-start">
-                <AlertTriangle className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" />
-                <div>
-                    <h3 className="font-bold">Security Notice</h3>
-                    <p className="text-sm">For demonstration purposes, these credentials are saved in your browser's local storage. This is not secure for a real application. Do not use real passwords.</p>
-                </div>
-            </div>
+            {/* Security notice removed as requested */}
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <InputField 

@@ -70,7 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isOpen, onClo
   const sidebarContent = (
       <div className="flex-1 flex flex-col">
         <div className="h-16 flex items-center px-6 border-b border-subtle flex-shrink-0">
-            <h1 className="text-xl font-bold text-text-primary tracking-tight">Eruptible PM</h1>
+            <h1 className="text-xl font-bold text-text-primary tracking-tight">Eruptible Dashboard</h1>
         </div>
         
         <div className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto">
