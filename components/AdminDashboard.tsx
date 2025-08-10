@@ -1,6 +1,6 @@
 
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Project } from '../types';
 import ProjectCard from './ProjectCard';
 import ProjectDetailsPage from './ProjectDetailsPage';
@@ -11,6 +11,7 @@ import LogConsolePanel from './LogConsolePanel';
 import { useAppContext } from '../contexts/AppContext';
 import { Loader2, Menu, ServerCrash } from 'lucide-react';
 import DocumentationPanel from './DocumentationPanel';
+import { ExternalLink } from 'lucide-react';
 
 type View = 'projects' | 'settings' | 'clients' | 'logs' | 'documentation';
 
@@ -20,6 +21,7 @@ const AdminDashboard: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [activeView, setActiveView] = useState<View>('projects');
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [airtableUrl, setAirtableUrl] = useState<string | null>(null);
   
   const handleSelectProject = (project: Project) => {
     setSelectedProject(project);
@@ -34,6 +36,17 @@ const AdminDashboard: React.FC = () => {
     setSelectedProject(null);
     setSidebarOpen(false);
   }
+
+  useEffect(() => {
+    async function loadAirtableInfo() {
+      try {
+        const res = await fetch('/api/airtable/info');
+        const data = await res.json();
+        setAirtableUrl(data?.url ?? null);
+      } catch {}
+    }
+    loadAirtableInfo();
+  }, []);
 
   const renderDashboardContent = () => {
     if (loading) {
@@ -131,6 +144,18 @@ const AdminDashboard: React.FC = () => {
                     {getHeaderSubtitle()}
                   </p>
                 </div>
+                {airtableUrl && (
+                  <a
+                    href={airtableUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-auto inline-flex items-center bg-secondary hover:bg-subtle text-text-primary font-medium px-3 py-2 rounded-md border border-subtle"
+                    title="Open Airtable"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Open Airtable
+                  </a>
+                )}
             </div>
         </header>
 

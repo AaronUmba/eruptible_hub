@@ -32,6 +32,13 @@ router.get('/airtable/health', async (req, res) => {
     }
 });
 
+// Airtable info (for building dynamic link)
+router.get('/airtable/info', (req, res) => {
+    const baseId = process.env.AIRTABLE_BASE_ID || null;
+    if (!baseId) return res.json({ baseId: null, url: null });
+    return res.json({ baseId, url: `https://airtable.com/${baseId}/` });
+});
+
 // --- Data Fetching Routes ---
 
 // Endpoint to get all initial data (projects, clients, deliverables)
