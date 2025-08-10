@@ -19,38 +19,23 @@ services:
     networks:
       - npm_network
 
-  # --- The Frontend React Service ---
-  # This service builds the React app into static files (HTML, JS, CSS).
-  frontend:
-    # Tell Docker to build this container from the project's root directory (context: .).
-    # And specify that it should use the 'Dockerfile.frontend' file for instructions.
+  # --- The Nginx Proxy Service ---
+  # This service is the public entry point. It receives all web traffic and decides where it should go.
+  # It serves the React frontend and proxies API requests to the backend.
+  proxy:
+    # Use our custom frontend image that contains both the React app and Nginx configuration
     build:
       context: .
       dockerfile: Dockerfile.frontend
-    # Name the container for easier identification.
-    container_name: eruptible-pm-frontend
-    networks:
-      - npm_network
-
-  # --- The Nginx Proxy Service ---
-  # This service is the public entry point. It receives all web traffic and decides where it should go.
-  proxy:
-    # Use the official, lightweight Nginx image from Docker Hub.
-    image: nginx:stable-alpine
     # Name the container for easier identification.
     container_name: eruptible-pm-proxy
     # Map port 8080 on your VPS to port 80 inside this container. This avoids conflict with Nginx Proxy Manager.
     ports:
       - "8080:80"
-    # Mount our custom Nginx configuration file into the container, replacing the default one.
-    # This tells Nginx how to handle our specific application's traffic.
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-    # This is crucial. It tells Docker not to start the proxy until the backend and frontend services
-    # are running, preventing connection errors on startup.
+    # This is crucial. It tells Docker not to start the proxy until the backend service
+    # is running, preventing connection errors on startup.
     depends_on:
       - backend
-      - frontend
     networks:
       - npm_network
 
