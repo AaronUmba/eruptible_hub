@@ -162,6 +162,14 @@ const Login: React.FC = () => {
             <footer className="text-center mt-8 text-text-secondary text-sm">
                 <p>Use 'admin' / 'password' for admin access (by default).</p>
                 <p>Use a client username / 'password' for client access.</p>
+                <div className="mt-4">
+                    <button
+                        onClick={() => window.location.href = '/forgot-password'}
+                        className="text-brand hover:text-brand/80 underline"
+                    >
+                        Forgot your password?
+                    </button>
+                </div>
             </footer>
         </div>
     </div>

@@ -68,24 +68,36 @@ const AdminSecuritySettings: React.FC = () => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
     };
     
-    const handleToggle2FA = () => {
+    const handleToggle2FA = async () => {
         const isEnabling = !formData.twoFactorEnabled;
-        setFormData(prev => ({ ...prev, twoFactorEnabled: isEnabling }));
-
+        
         if(isEnabling) {
-            const secret = state.adminCredentials.twoFactorSecret || generateRandomSecret();
-            const totp = new OTPAuth.TOTP({
-                issuer: 'Eruptible PM',
-                label: formData.username || 'admin',
-                algorithm: 'SHA1',
-                digits: 6,
-                period: 30,
-                secret: secret,
-            });
-            setFormData(prev => ({ ...prev, twoFactorSecret: secret }));
-            setTotpUri(totp.toString());
-            setShow2FASetup(true);
+            try {
+                const response = await fetch('/api/auth/setup-2fa', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('eruptible_auth_token')}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to setup 2FA');
+                }
+                
+                const data = await response.json();
+                setFormData(prev => ({ 
+                    ...prev, 
+                    twoFactorEnabled: true,
+                    twoFactorSecret: data.secret 
+                }));
+                setTotpUri(data.qrCode);
+                setShow2FASetup(true);
+            } catch (error) {
+                setMessage({ type: 'error', text: 'Failed to setup 2FA' });
+            }
         } else {
+            setFormData(prev => ({ ...prev, twoFactorEnabled: false }));
             setShow2FASetup(false);
         }
     };
