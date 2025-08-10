@@ -1,6 +1,5 @@
 
 import React, { createContext, useContext, useReducer, useEffect, ReactNode, useCallback } from 'react';
-import * as OTPAuth from 'otpauth'; // Note: 2FA logic is now demo-only without a backend implementation
 import { AppState, Action, User, Deliverable, ClientCompany, AdminCredentials, AuthResponse, LogEntry } from '../types';
 
 const AUTH_TOKEN_KEY = 'eruptible_auth_token';
@@ -139,9 +138,8 @@ const appReducer = (state: AppState, action: Action): AppState => {
 
 export interface AppContextType {
   state: AppState;
-  login: (username: string, password: string) => Promise<'SUCCESS' | '2FA_REQUIRED'>;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => void;
-  verify2FACode: (code: string) => Promise<void>;
   updateAdminCredentials: (creds: Partial<AdminCredentials>) => void;
   updateClient: (client: ClientCompany) => Promise<void>;
   toggleDeliverable: (projectId: string, deliverableId: string, currentStatus: Deliverable['status']) => Promise<void>;
@@ -195,7 +193,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   }, [state.token, state.user, loadBackendData]);
 
-  const login = async (username: string, password: string): Promise<'SUCCESS' | '2FA_REQUIRED'> => {
+  const login = async (username: string, password: string): Promise<void> => {
     try {
       const response = await fetch('/api/auth/login', {
           method: 'POST',
@@ -207,49 +205,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           throw new Error(errorData.message || 'Invalid credentials');
       }
       const data: AuthResponse = await response.json();
-
-      // 2FA check remains a frontend demo for now
-      if (data.user.role === 'admin' && state.adminCredentials.twoFactorEnabled) {
-          return '2FA_REQUIRED';
-      }
       localStorage.setItem(AUTH_TOKEN_KEY, data.token);
       dispatch({ type: 'LOGIN_SUCCESS', payload: data });
-      return 'SUCCESS';
     } catch(err) {
       addLog({ type: 'warn', message: 'Login failed', details: (err as Error).message });
       throw err;
     }
-  };
-
-  const verify2FACode = async (code: string): Promise<void> => {
-      const { adminCredentials } = state;
-      if (!adminCredentials.twoFactorEnabled || !adminCredentials.twoFactorSecret) {
-          throw new Error('2FA is not configured for this account.');
-      }
-      try {
-        const totp = new OTPAuth.TOTP({
-            issuer: 'Eruptible PM',
-            label: adminCredentials.username,
-            secret: adminCredentials.twoFactorSecret,
-        });
-        const delta = totp.validate({ token: code, window: 1 });
-        if (delta === null) throw new Error('Invalid 2FA code.');
-
-        // In real app, you'd send this to a `/api/auth/verify-2fa` endpoint.
-        // For demo, we just re-run the login logic to get a token.
-        const response = await fetch('/api/auth/login', {
-             method: 'POST',
-             headers: { 'Content-Type': 'application/json' },
-             body: JSON.stringify({ username: adminCredentials.username, password: adminCredentials.password }),
-        });
-        const data: AuthResponse = await response.json();
-        localStorage.setItem(AUTH_TOKEN_KEY, data.token);
-        dispatch({ type: 'LOGIN_SUCCESS', payload: data });
-
-      } catch (err) {
-          addLog({ type: 'warn', message: '2FA verification failed', details: (err as Error).message });
-          throw err;
-      }
   };
 
   const logout = () => {
@@ -311,7 +272,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   return (
     <AppContext.Provider value={{ 
-        state, login, logout, verify2FACode, updateAdminCredentials, 
+        state, login, logout, updateAdminCredentials, 
         updateClient, toggleDeliverable, manualSync, clearLogs, 
         toggleTheme, addLog
     }}>

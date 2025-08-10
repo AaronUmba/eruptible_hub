@@ -5,7 +5,6 @@
   "type": "module",
   "dependencies": {
     "lucide-react": "^0.408.0",
-    "otpauth": "^9.2.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

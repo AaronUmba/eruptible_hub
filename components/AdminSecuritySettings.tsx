@@ -2,17 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../contexts/AppContext';
 import { AdminCredentials } from '../types';
-import * as OTPAuth from 'otpauth';
 import { ShieldCheck, AlertTriangle } from 'lucide-react';
 
-const generateRandomSecret = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'; // Base32 characters
-    let secret = '';
-    for (let i = 0; i < 16; i++) {
-        secret += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return secret;
-};
+// 2FA removed for now
 
 const InputField: React.FC<{ label: string, id: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, placeholder?: string, type?: string, autoComplete?: string }> = 
 ({ label, id, value, onChange, placeholder, type = "text", autoComplete }) => (
@@ -30,20 +22,7 @@ const InputField: React.FC<{ label: string, id: string, value: string, onChange:
   </div>
 );
 
-const ToggleSwitch: React.FC<{ label: string, enabled: boolean, onToggle: () => void }> = ({ label, enabled, onToggle }) => (
-    <div className="flex items-center justify-between py-3">
-        <span className="text-text-primary font-medium">{label}</span>
-        <button
-            type="button"
-            role="switch"
-            aria-checked={enabled}
-            onClick={onToggle}
-            className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-surface focus:ring-brand ${enabled ? 'bg-brand' : 'bg-subtle'}`}
-        >
-            <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform duration-300 ${enabled ? 'translate-x-6' : 'translate-x-1'}`} />
-        </button>
-    </div>
-);
+// ToggleSwitch no longer used after 2FA removal
 
 
 const AdminSecuritySettings: React.FC = () => {
@@ -51,16 +30,15 @@ const AdminSecuritySettings: React.FC = () => {
     const [formData, setFormData] = useState<Partial<AdminCredentials>>({});
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [show2FASetup, setShow2FASetup] = useState(false);
-    const [totpUri, setTotpUri] = useState('');
+    // 2FA UI removed
     const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
     useEffect(() => {
         setFormData({
             username: state.adminCredentials.username,
             recoveryEmail: state.adminCredentials.recoveryEmail || '',
-            twoFactorEnabled: state.adminCredentials.twoFactorEnabled,
-            twoFactorSecret: state.adminCredentials.twoFactorSecret,
+            twoFactorEnabled: false,
+            twoFactorSecret: undefined,
         });
     }, [state.adminCredentials]);
 
@@ -68,27 +46,7 @@ const AdminSecuritySettings: React.FC = () => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
     };
     
-    const handleToggle2FA = () => {
-        const isEnabling = !formData.twoFactorEnabled;
-        setFormData(prev => ({ ...prev, twoFactorEnabled: isEnabling }));
-
-        if(isEnabling) {
-            const secret = state.adminCredentials.twoFactorSecret || generateRandomSecret();
-            const totp = new OTPAuth.TOTP({
-                issuer: 'Eruptible PM',
-                label: formData.username || 'admin',
-                algorithm: 'SHA1',
-                digits: 6,
-                period: 30,
-                secret: secret,
-            });
-            setFormData(prev => ({ ...prev, twoFactorSecret: secret }));
-            setTotpUri(totp.toString());
-            setShow2FASetup(true);
-        } else {
-            setShow2FASetup(false);
-        }
-    };
+    // 2FA toggle removed
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -104,10 +62,7 @@ const AdminSecuritySettings: React.FC = () => {
             credsToUpdate.password = newPassword;
         }
 
-        // if disabling 2FA, remove the secret
-        if (state.adminCredentials.twoFactorEnabled && !formData.twoFactorEnabled) {
-            credsToUpdate.twoFactorSecret = undefined;
-        }
+        // 2FA removed
 
         updateAdminCredentials(credsToUpdate);
         setMessage({ type: 'success', text: 'Settings saved successfully!' });
@@ -171,28 +126,7 @@ const AdminSecuritySettings: React.FC = () => {
                 />
                 <p className="text-xs text-text-secondary -mt-4">Note: Email functionality is not implemented in this demo.</p>
 
-                <div className="border-t border-subtle pt-6">
-                     <ToggleSwitch label="Two-Factor Authentication (2FA)" enabled={formData.twoFactorEnabled || false} onToggle={handleToggle2FA} />
-                </div>
-
-                {show2FASetup && formData.twoFactorEnabled && (
-                    <div className="bg-secondary p-4 rounded-md border border-subtle">
-                         <h3 className="font-bold text-text-primary mb-2">Set up 2FA</h3>
-                         <p className="text-sm text-text-secondary mb-4">Scan the QR code with your authenticator app (e.g., Google Authenticator, Authy). Save your changes to enable 2FA on your next login.</p>
-                         <div className="flex flex-col md:flex-row items-center gap-4">
-                            <img
-                                src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(totpUri)}&bgcolor=F9FAFB`}
-                                alt="2FA QR Code"
-                                className="w-40 h-40 p-2 bg-white rounded-md border"
-                            />
-                            <div className="text-sm">
-                                <p className="text-text-secondary">Can't scan? Enter this code manually:</p>
-                                <p className="font-mono bg-background p-2 rounded-md my-2 text-brand tracking-wider">{formData.twoFactorSecret}</p>
-                                <p className="text-text-secondary">Make sure to save this secret in a secure location. You will need it to recover your account.</p>
-                            </div>
-                         </div>
-                    </div>
-                )}
+                {/* 2FA UI removed */}
                 
                 <div className="flex items-center pt-2">
                     <button

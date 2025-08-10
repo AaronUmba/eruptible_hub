@@ -48,7 +48,7 @@ router.patch('/clients/:recordId', async (req, res) => {
     }
 });
 
-// --- Auth Route ---
+// --- Auth Routes ---
 
 router.post('/auth/login', async (req, res) => {
     const { username, password } = req.body;
@@ -58,6 +58,13 @@ router.post('/auth/login', async (req, res) => {
     } catch (error) {
         res.status(401).json({ message: error.message });
     }
+});
+
+// Password reset request stub (always respond 200 to avoid account enumeration)
+router.post('/auth/request-password-reset', async (req, res) => {
+    // const { identifier } = req.body; // email or username
+    // TODO: Implement email sending via configured provider
+    res.json({ message: 'If an account exists, a reset link has been sent.' });
 });
 
 
